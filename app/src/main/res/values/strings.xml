@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BlockKo</string>
+    <string name="qs_tile_label">BlockKo</string>
+    <string name="notif_channel_name">BlockKo Protection</string>
+    <string name="notif_channel_desc">Persistent status notification while BlockKo is filtering DNS traffic</string>
+    <string name="notif_pause_action">Pause 5 min</string>
+    <string name="notif_resume_action">Resume</string>
+</resources>
