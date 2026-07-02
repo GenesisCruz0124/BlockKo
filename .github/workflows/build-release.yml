@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to tag and release (e.g. 1.0.0)"
+        required: true
+        default: "1.0.0"
 
 jobs:
   build:
@@ -35,11 +40,24 @@ jobs:
             RAW_REF="${GITHUB_REF#refs/tags/}"
             VERSION="${RAW_REF#v}"
           else
-            VERSION=$(grep -oP '(?<=versionName = ")[^"]+' app/build.gradle.kts)
-            RAW_REF="manual-${GITHUB_RUN_NUMBER}"
+            VERSION="${{ inputs.version }}"
+            RAW_REF="v${VERSION}"
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$RAW_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push version tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          TAG="${{ steps.version.outputs.tag }}"
+          if [ -n "$(git ls-remote --tags origin "refs/tags/$TAG")" ]; then
+            echo "Tag $TAG already exists on origin, skipping creation."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "BlockKo $TAG"
+            git push origin "$TAG"
+          fi
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
